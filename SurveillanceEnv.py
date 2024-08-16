@@ -1,5 +1,6 @@
 import gym
 import numpy as np
+from EveActionSpace import EveActionSpace
 
 class MIMO:
     def __init__(self, num_rx=3, num_tx=3, max_power=10):
@@ -16,3 +17,4 @@ class SurveillanceEnv(gym.Env):
         self.destination = destination
         self.eve = eve
 
+        self.action_space = EveActionSpace(self.eve)
