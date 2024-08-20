@@ -2,6 +2,7 @@ import gym
 import numpy as np
 from EveActionSpace import EveActionSpace
 from gym.spaces import Box, Dict
+from gym import spaces
 
 class MIMO:
     def __init__(self, num_rx=3, num_tx=3, max_power=10):
@@ -11,8 +12,8 @@ class MIMO:
 
 class SurveillanceEnv(gym.Env):
     def __init__(self,
-                 src=MIMO(0, 3),
-                 dst=MIMO(3, 0),
+                 src=MIMO(0, 5),
+                 dst=MIMO(5, 0),
                  eve=MIMO(5, 5), ):
         self.src = src
         self.dst = dst
@@ -20,29 +21,19 @@ class SurveillanceEnv(gym.Env):
 
         self.action_space = EveActionSpace(self.eve)
 
-        self.observation_space = Dict({
-            "HSD": Box(low=-np.inf, high=np.inf,
-                       shape=(dst.num_rx, src.num_tx),
-                       dtype=np.complex128),
-            "HSE": Box(low=-np.inf, high=np.inf,
-                       shape=(eve.num_rx, src.num_tx),
-                       dtype=np.complex128),
-            "HED": Box(low=-np.inf, high=np.inf,
-                       shape=(dst.num_rx, eve.num_tx),
-                       dtype=np.complex128),
-            "HEE": Box(low=-np.inf, high=np.inf,
-                       shape=(eve.num_rx, eve.num_tx),
-                       dtype=np.complex128),
-            "signal D": Box(low=-np.inf, high=np.inf,
-                       shape=(dst.num_rx, dst.num_rx),
-                       dtype=np.complex128),
-            "noise D": Box(low=-np.inf, high=np.inf,
-                       shape=(dst.num_rx, dst.num_rx),
-                       dtype=np.complex128),
-            "signal E": Box(low=-np.inf, high=np.inf,
-                       shape=(eve.num_rx, dst.num_rx),
-                       dtype=np.complex128),
-            "noise E": Box(low=-np.inf, high=np.inf,
-                       shape=(eve.num_rx, eve.num_rx),
-                       dtype=np.complex128),
-        })
+        self.observation_space = spaces.Box(
+            low = -np.inf,
+            high = np.inf,
+            shape = (8, 5, 5),
+            dtype = np.complex128,
+        )
+
+        self.reset()
+
+    def reset(self):
+        diag_elem = np.zeros(shape=self.src.num_tx)
+        self.cov_src = np.diag(diag_elem)
+        diag_elem = np.zeros(shape=self.eve.num_tx)
+        self.cov_eve = np.diag(diag_elem)
+
+
