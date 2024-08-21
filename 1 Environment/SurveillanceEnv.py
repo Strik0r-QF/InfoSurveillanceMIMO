@@ -178,7 +178,8 @@ class SurveillanceEnv(gym.Env):
             signal_eve * np.conjugate(signal_eve)
         )
 
-        noise_eve = np.matmul(H_EE, fwd_eve) + random_noise(self.eve.num_rx)
+        # noise_eve = np.matmul(H_EE, fwd_eve) + random_noise(self.eve.num_rx)
+        noise_eve = random_noise(self.eve.num_rx)
         cov_noise_eve = noise_eve @ np.conjugate(noise_eve).T
         self.state[14] = cov_noise_eve.real
         self.state[15] = cov_noise_eve.imag
