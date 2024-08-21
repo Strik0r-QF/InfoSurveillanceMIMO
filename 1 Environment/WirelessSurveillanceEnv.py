@@ -2,6 +2,8 @@ import gym
 import numpy as np
 from gym import spaces
 from SurveillanceEnv import generate_complex_channel_matrix, MIMO
+import random
+import torch
 
 class WirelessSurveillanceEnv(gym.Env):
     def __init__(self,
@@ -61,9 +63,9 @@ class WirelessSurveillanceEnv(gym.Env):
         self.eve_power = np.clip(self.eve_power, 0, 10)
 
         if not self.communicate:
-            scale = np.random.uniform(1.1, 2)
+            scale = np.random.uniform(1.05, 1.1)
         else:
-            scale = np.random.uniform(0.9, 1.1)
+            scale = np.random.uniform(0.95, 1.05)
         self.state[0] = np.clip(
             scale * self.state[0],
             0, 10,
@@ -101,7 +103,7 @@ class WirelessSurveillanceEnv(gym.Env):
         h_EE = np.linalg.norm(H_EE, ord='fro') ** 2
         self.state[5] = h_EE
 
-        SNR_E = h_SE * self.state[0] / (self.sigma2)
+        SNR_E = h_SE * self.state[0] / (self.sigma2 + 0.2 * h_EE * self.eve_power)
         self.state[1] = SNR_E
         SNR_D = h_SD * self.state[0] / (self.sigma2 + h_ED * self.eve_power)
 
@@ -123,3 +125,11 @@ class WirelessSurveillanceEnv(gym.Env):
 
     def close(self):
         pass
+
+    def seed(self, seed=None):
+        """设置环境的随机种子"""
+        if seed is not None:
+            random.seed(seed)
+            np.random.seed(seed)
+            # 如果你的环境中使用其他随机性库，例如 torch，也需要设置种子
+            torch.manual_seed(seed)

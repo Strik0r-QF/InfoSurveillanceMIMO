@@ -2,12 +2,25 @@ import numpy as np
 import pandas as pd
 from utils import *
 
-csv_file = "2 LearningAlgorithms/epi_rewards-lr=1e-2.csv"
-df = pd.read_csv(csv_file)
+dir = "results/7/"
+csv_files = [
+    # dir + "epi_rewards-lr=1e-3.csv",
+    # "results/3/3-1.csv",
+    dir + "7-2.csv",
+]
+episode_reward_list = []
 
-# print(df.head())
+for csv_file in csv_files:
+    df = pd.read_csv(csv_file)
+    episode_reward_list.append(df["Reward"].to_numpy()[:50])
 
-# 提取 'Reward' 列的数据并转换为 NumPy 数组
-epi_rewards = df['Reward'].to_numpy()
-
-plot_reward([epi_rewards], sm=550)
+plot_reward(rewards_list=episode_reward_list,
+            labels=[
+                r"Reward",
+                # r"$\gamma=0.9$",
+                # "lr=0.005",
+                # "lr=0.01",
+            ],
+            sm=5,
+            title="Episode Rewards with Learning Rate",
+            )

@@ -63,24 +63,30 @@ def plot_function(independent_varaiable,
 
 import numpy as np
 
+
 def smooth(data, sm=1):
-    """平滑数据的函数"""
+    """平滑数据的函数，同时返回平滑后的数据和窗口内的标准差"""
     if sm < 1:
         raise ValueError("Smoothing parameter 'sm' must be at least 1.")
 
-    if sm == 1:
-        return np.array(data)  # 如果 sm 为 1，直接返回原始数据的数组形式
-
     data = np.array(data)  # 确保 data 是 numpy 数组
-    z = np.ones(len(data))
-    y = np.ones(sm) * 1.0
+    smoothed_data = np.zeros(len(data))
+    std_devs = np.zeros(len(data))
 
-    numerator = np.convolve(y, data, mode="same")
-    denominator = np.convolve(y, z, mode="same")
-    smoothed_data = numerator / denominator
+    # 处理前 sm 个数据点，窗口大小从 1 逐渐增大
+    for i in range(sm):
+        window = data[:i + int(sm / 10)]
+        smoothed_data[i] = np.mean(window)
+        std_devs[i] = np.std(window)
 
-    return smoothed_data  # 返回为一维数组形式
 
+    # 处理中间部分，窗口大小固定为 sm
+    for i in range(sm, len(data)):
+        window = data[i - sm:i]
+        smoothed_data[i] = np.mean(window)
+        std_devs[i] = np.std(window)
+
+    return smoothed_data, std_devs
 
 
 def plot_reward(rewards_list,
@@ -92,38 +98,32 @@ def plot_reward(rewards_list,
 
     if labels is None:
         for rewards in rewards_list:
-            smoothed_rewards = smooth(rewards, sm=sm)
+            smoothed_rewards, std_devs = smooth(rewards, sm=sm)
             plt.plot(smoothed_rewards, linewidth=2)
 
-            # 添加阴影处理
-            std = np.std(smoothed_rewards)
-            mean = np.mean(smoothed_rewards)
             plt.fill_between(
                 range(len(smoothed_rewards)),
-                smoothed_rewards - std,
-                smoothed_rewards + std,
+                smoothed_rewards - std_devs,
+                smoothed_rewards + std_devs,
                 alpha=0.2,
             )
     else:
         for rewards, label in zip(rewards_list, labels):
-            smoothed_rewards = smooth(rewards, sm=sm)
+            smoothed_rewards, std_devs = smooth(rewards, sm=sm)
             plt.plot(smoothed_rewards,
                      label=label,
                      linewidth=2)
-            # 添加阴影处理
-            std = np.std(smoothed_rewards)
-            mean = np.mean(smoothed_rewards)
+
             plt.fill_between(
                 range(len(smoothed_rewards)),
-                smoothed_rewards - std,
-                smoothed_rewards + std,
+                smoothed_rewards - std_devs,
+                smoothed_rewards + std_devs,
                 alpha=0.2,
             )
 
     plt.xlabel('Episode', fontsize=20)
     plt.ylabel('Reward', fontsize=20)
 
-    # title
     if title is not None:
         plt.title(title, fontsize=20)
 
@@ -132,8 +132,8 @@ def plot_reward(rewards_list,
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
 
-    # save the picture
     if filename is not None:
         plt.savefig("/pic/" + filename)
 
     plt.show()
+

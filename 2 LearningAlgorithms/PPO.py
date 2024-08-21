@@ -2,10 +2,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.distributions import Categorical
-import numpy as np
 from WirelessSurveillanceEnv import *
 import pandas as pd
-import matplotlib.pyplot as plt
+import random
 
 
 class PolicyNetwork(nn.Module):
@@ -134,62 +133,3 @@ class Memory:
         del self.logprobs[:]
         del self.rewards[:]
         del self.is_terminals[:]
-
-
-# Hyperparameters
-input_dim = 1  # 你的状态维度
-output_dim = 2  # 动作维度（增加功率或减少功率）
-lr = 0.01
-gamma = 0.99
-eps_clip = 0.2
-k_epochs = 4
-update_timestep = 2000
-
-env = WirelessSurveillanceEnv()
-agent = PPOAgent(input_dim, output_dim, lr, gamma, eps_clip, k_epochs)
-memory = Memory()
-
-timestep = 0
-epi_rewards = []
-for i_episode in range(2000):
-    state = env.reset()
-    epi_reward = 0
-    for t in range(0, 500):
-        timestep += 1
-
-        action, logprob = agent.select_action(state)
-        next_state, reward, done, info = env.step(action)
-
-        epi_reward += reward
-
-        memory.states.append(state)
-        memory.actions.append(action)
-        memory.logprobs.append(logprob)
-        memory.rewards.append(reward)
-        memory.is_terminals.append(done)
-
-        if timestep % update_timestep == 0:
-            agent.update(memory)
-            memory.clear_memory()
-            timestep = 0
-
-        state = next_state
-
-        if done:
-            break
-    print(f"Episode: {i_episode}, Reward: {epi_reward}")
-    epi_rewards.append(epi_reward)
-
-    # 保存模型
-    if i_episode % 100 == 0:  # 每 100 个 episode 保存一次
-        torch.save(agent.policy_net.state_dict(),
-                   f'policy_net.pth')
-        torch.save(agent.value_net.state_dict(),
-                   f'value_net.pth')
-
-# 保存训练过程的奖励数据
-epi_rewards = np.array(epi_rewards)
-# 将 epi_rewards 转换为 Pandas DataFrame
-df = pd.DataFrame({'Episode': np.arange(1, len(epi_rewards) + 1), 'Reward': epi_rewards})
-# 将 DataFrame 保存为 CSV 文件
-df.to_csv('epi_rewards-lr=1e-2.csv', index=False)
