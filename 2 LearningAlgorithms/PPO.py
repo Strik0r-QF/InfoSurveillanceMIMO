@@ -180,12 +180,14 @@ for i_episode in range(2000):
     print(f"Episode: {i_episode}, Reward: {epi_reward}")
     epi_rewards.append(epi_reward)
 
+    # 保存模型
     if i_episode % 100 == 0:  # 每 100 个 episode 保存一次
         torch.save(agent.policy_net.state_dict(),
                    f'policy_net.pth')
         torch.save(agent.value_net.state_dict(),
                    f'value_net.pth')
 
+# 保存训练过程的奖励数据
 epi_rewards = np.array(epi_rewards)
 # 将 epi_rewards 转换为 Pandas DataFrame
 df = pd.DataFrame({'Episode': np.arange(1, len(epi_rewards) + 1), 'Reward': epi_rewards})
