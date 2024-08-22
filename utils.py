@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
-from webencodings import labels
+import pandas as pd
 
 # 设置 TeX
 matplotlib.rcParams['font.family'] = 'Times New Roman'
@@ -112,7 +112,7 @@ def plot_reward(rewards_list,
             smoothed_rewards, std_devs = smooth(rewards, sm=sm)
             plt.plot(smoothed_rewards,
                      label=label,
-                     linewidth=2)
+                     linewidth=3)
 
             plt.fill_between(
                 range(len(smoothed_rewards)),

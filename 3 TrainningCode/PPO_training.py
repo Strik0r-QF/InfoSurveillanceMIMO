@@ -12,15 +12,9 @@ def set_seed(seed):
 # Hyperparameters
 input_dim = 1  # 你的状态维度
 output_dim = 2  # 动作维度（增加功率或减少功率）
-lr = 0.001
-gamma = 0.7
-eps_clip = 0.2
-k_epochs = 4
 update_timestep = 2000
 
-# 设置随机种子
-seed = 0
-set_seed(seed)
+
 
 # 初始化环境和代理
 env = WirelessSurveillanceEnv(
@@ -28,10 +22,14 @@ env = WirelessSurveillanceEnv(
                 dst=MIMO(1, 0),
                 eve=MIMO(3, 2),
 )
+
+# 设置随机种子
+seed = 303324
+set_seed(seed)
 env.seed(seed)
 
 learning_rates = [
-    0.0001,
+    0.01,
 ]
 discounts = [
     # 0.9,
@@ -39,14 +37,14 @@ discounts = [
     0.5,
 ]
 eps_clips = [
-    # 0.2,
-    0.5,
+    0.1,
+    # 0.5,
     # 0.7,
 ]
 k_epochs = [
     # 4,
-    # 8,
-    16,
+    8,
+    # 16,
 ]
 count = 0
 
@@ -62,7 +60,7 @@ for lr in learning_rates:
 
                 timestep = 0
                 epi_rewards = []
-                for i_episode in range(500):
+                for i_episode in range(2000):
                     state = env.reset()
                     epi_reward = 0
                     for t in range(0, 500):

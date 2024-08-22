@@ -57,9 +57,9 @@ class WirelessSurveillanceEnv(gym.Env):
 
     def step(self, action):
         if action == 0:
-            self.eve_power += 1e-2 * np.random.uniform(0, 1)
+            self.eve_power += 5e-2 * np.random.uniform(0, 1)
         else:
-            self.eve_power -= 1e-2 * np.random.uniform(0, 1)
+            self.eve_power -= 5e-2 * np.random.uniform(0, 1)
         self.eve_power = np.clip(self.eve_power, 0, 10)
 
         if not self.communicate:
@@ -103,7 +103,7 @@ class WirelessSurveillanceEnv(gym.Env):
         h_EE = np.linalg.norm(H_EE, ord='fro') ** 2
         self.state[5] = h_EE
 
-        SNR_E = h_SE * self.state[0] / (self.sigma2 + 0.2 * h_EE * self.eve_power)
+        SNR_E = h_SE * self.state[0] / (self.sigma2 + h_EE * self.eve_power)
         self.state[1] = SNR_E
         SNR_D = h_SD * self.state[0] / (self.sigma2 + h_ED * self.eve_power)
 
