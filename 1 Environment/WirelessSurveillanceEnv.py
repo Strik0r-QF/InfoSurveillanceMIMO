@@ -111,7 +111,7 @@ class WirelessSurveillanceEnv(gym.Env):
         capacity_D = np.log2(1 + SNR_D)
         self.communicate = capacity_D >= 2
 
-        reward = capacity_D if capacity_E >= capacity_D >= 2 else 0
+        reward = np.arctan(capacity_D - 2 if capacity_E >= capacity_D >= 2 else 0)
         done = False
 
         return self._get_observation(), reward, done, {}

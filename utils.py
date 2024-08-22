@@ -137,3 +137,51 @@ def plot_reward(rewards_list,
 
     plt.show()
 
+def plot_smoothed_reward(rewards_list,
+                labels=None,
+                sm=10,
+                title=None,
+                filename=None):
+    plt.figure(figsize=(12, 9))
+
+    if labels is None:
+        for rewards in rewards_list:
+            smoothed_rewards = rewards.rolling(window=sm).mean()
+            rewards_std = rewards.rolling(window=sm).std()
+            plt.plot(smoothed_rewards, linewidth=2)
+
+            plt.fill_between(
+                range(len(smoothed_rewards)),
+                smoothed_rewards - rewards_std,
+                smoothed_rewards + rewards_std,
+                alpha=0.2,
+            )
+    else:
+        for rewards, label in zip(rewards_list, labels):
+            smoothed_rewards = rewards.rolling(window=sm).mean()
+            rewards_std = rewards.rolling(window=sm).std()
+            plt.plot(smoothed_rewards, linewidth=2,
+                    label=label)
+
+            plt.fill_between(
+                range(len(smoothed_rewards)),
+                smoothed_rewards - rewards_std,
+                smoothed_rewards + rewards_std,
+                alpha=0.2,
+            )
+
+    plt.xlabel('Episode', fontsize=20)
+    plt.ylabel('Reward', fontsize=20)
+
+    if title is not None:
+        plt.title(title, fontsize=20)
+
+    plt.grid(True)
+    plt.legend(fontsize=20)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+
+    if filename is not None:
+        plt.savefig("/pic/" + filename)
+
+    plt.show()

@@ -37,14 +37,14 @@ discounts = [
     0.5,
 ]
 eps_clips = [
-    0.1,
+    0.15,
     # 0.5,
     # 0.7,
 ]
 k_epochs = [
     # 4,
-    8,
-    # 16,
+    # 8,
+    16,
 ]
 count = 0
 
@@ -60,7 +60,7 @@ for lr in learning_rates:
 
                 timestep = 0
                 epi_rewards = []
-                for i_episode in range(2000):
+                for i_episode in range(1000):
                     state = env.reset()
                     epi_reward = 0
                     for t in range(0, 500):
@@ -104,3 +104,9 @@ for lr in learning_rates:
                     'Reward': epi_rewards})
                 # 将 DataFrame 保存为 CSV 文件
                 df.to_csv(f'epi_rewards-{count}.csv', index=False)
+
+                agent.policy_net.eval()
+                agent.value_net.eval()
+
+                dummy_input = torch.Tensor(np.array([3]))  # 这里假设输入的维度是 [batch_size, input_features]
+
