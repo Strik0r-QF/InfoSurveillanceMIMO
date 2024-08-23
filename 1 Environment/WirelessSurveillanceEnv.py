@@ -14,7 +14,13 @@ class WirelessSurveillanceEnv(gym.Env):
         self.dst = dst
         self.eve = eve
 
-        self.action_space = spaces.Discrete(2)
+        # 动作空间：动作为一个连续值，表示噪声功率的增减幅度
+        self.action_space = spaces.Box(
+            low=np.array([-0.1]),  # 最小可减少的功率
+            high=np.array([0.1]),  # 最大可增加的功率
+            dtype=np.float32
+        )
+
         # Observation space: Eve只能观察 [SNR_E]
         self.observation_space = spaces.Box(
             low=np.array([0]),
@@ -52,15 +58,17 @@ class WirelessSurveillanceEnv(gym.Env):
         )
 
         self.communicate = True
+        self.count = 0
 
         return self._get_observation()
 
     def step(self, action):
-        if action == 0:
-            self.eve_power += 5e-2 * np.random.uniform(0, 1)
-        else:
-            self.eve_power -= 5e-2 * np.random.uniform(0, 1)
-        self.eve_power = np.clip(self.eve_power, 0, 10)
+        self.count += 1
+
+        # 动作决定 eve_power 的增减幅度
+        self.eve_power += action
+        self.eve_power = np.clip(self.eve_power,
+                                 0, self.eve.max_power)
 
         if not self.communicate:
             scale = np.random.uniform(1.05, 1.1)
@@ -111,8 +119,11 @@ class WirelessSurveillanceEnv(gym.Env):
         capacity_D = np.log2(1 + SNR_D)
         self.communicate = capacity_D >= 2
 
-        reward = np.arctan(capacity_D - 2 if capacity_E >= capacity_D >= 2 else 0)
-        done = False
+        reward = capacity_D if self.communicate else 0
+        done = (self.count == 500
+                # or (self.state[0] == self.src.max_power
+                #     and not self.communicate)
+                )
 
         return self._get_observation(), reward, done, {}
 
@@ -126,10 +137,10 @@ class WirelessSurveillanceEnv(gym.Env):
     def close(self):
         pass
 
-    def seed(self, seed=None):
-        """设置环境的随机种子"""
-        if seed is not None:
-            random.seed(seed)
-            np.random.seed(seed)
-            # 如果你的环境中使用其他随机性库，例如 torch，也需要设置种子
-            torch.manual_seed(seed)
+    # def seed(self, seed=None):
+    #     """设置环境的随机种子"""
+    #     if seed is not None:
+    #         random.seed(seed)
+    #         np.random.seed(seed)
+    #         # 如果你的环境中使用其他随机性库，例如 torch，也需要设置种子
+    #         torch.manual_seed(seed)

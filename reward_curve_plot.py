@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 dir = "results/9/"
 csv_files = [
-    dir + "9-1.csv",
+    dir + "9-2.csv",
     # dir + "8-5.csv",
     # dir + "8-7.csv",
     # dir + "8-6.csv",
@@ -25,7 +25,7 @@ plot_smoothed_reward(rewards_list=episode_reward_list,
                         # r"lr=0.005",
                         # r"lr=0.001",
                      ],
-                     sm=100)
+                     sm=10)
 
 # plot_reward(rewards_list=episode_reward_list,
 #             labels=[
