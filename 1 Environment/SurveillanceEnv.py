@@ -1,63 +1,7 @@
 import gym
 import numpy as np
 from gym import spaces
-
-def random_noise(size):
-    sigma2 = 20e6 * 1.02 * 10e-12
-    real = np.random.normal(0, sigma2, size=size)
-    imag = np.random.normal(0, sigma2, size=size)
-    return real + 1j * imag
-
-def generate_complex_vector_with_trace_limit(n, T_max):
-    """
-    生成一个长度为 n 的复数列向量，使其自相关矩阵的迹不超过 T_max
-    :param n: 向量长度
-    :param T_max: 自相关矩阵的最大迹
-    :return: 复数列向量
-    """
-    # Step 1: 随机生成一个复数列向量
-    x = np.random.normal(0, 1, n) + 1j * np.random.normal(0, 1, n)
-
-    # Step 2: 计算自相关矩阵的迹
-    trace_x = np.trace(
-        np.dot(x[:, np.newaxis], np.conjugate(x[:, np.newaxis]).T))
-
-    # Step 3: 如果迹超过 T_max，调整复向量的幅度
-    if trace_x > T_max:
-        scale_factor = np.sqrt(T_max / trace_x)
-        x = x * scale_factor
-
-    return x
-
-def generate_complex_channel_matrix(prev_H, num_rx, num_tx, alpha=0.9):
-    """
-    生成带有时间相关性的复信道矩阵
-    :param prev_H: 上一个时刻的信道矩阵
-    :param num_rx: 接收天线数量
-    :param num_tx: 发送天线数量
-    :param alpha: 时间相关性参数，取值范围在 (0, 1) 之间
-    :return: 复信道矩阵
-    """
-    if prev_H is None:
-        # 如果没有前一个信道矩阵，随机初始化一个
-        real_part = np.random.normal(0, 1 / np.sqrt(2), (num_rx, num_tx))
-        imag_part = np.random.normal(0, 1 / np.sqrt(2), (num_rx, num_tx))
-        return real_part + 1j * imag_part
-
-    # 生成新的信道矩阵
-    real_part = np.random.normal(0, 1 / np.sqrt(2), (num_rx, num_tx))
-    imag_part = np.random.normal(0, 1 / np.sqrt(2), (num_rx, num_tx))
-    new_H = real_part + 1j * imag_part
-
-    # 使用一阶自回归模型更新信道矩阵
-    H = alpha * prev_H + np.sqrt(1 - alpha ** 2) * new_H
-    return H
-
-class MIMO:
-    def __init__(self, num_rx=3, num_tx=3, max_power=10):
-        self.num_rx = num_rx
-        self.num_tx = num_tx
-        self.max_power = max_power
+from utils import generate_complex_channel_matrix, MIMO
 
 class SurveillanceEnv(gym.Env):
     def __init__(self,

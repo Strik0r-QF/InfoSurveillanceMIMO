@@ -10,7 +10,6 @@ def training_td3_agent(episodes=500):
         state = env.reset()
         episode_reward = 0
 
-
         while True:
             state = state.reshape(1, -1)
             action = agent.policy(state)
@@ -20,7 +19,6 @@ def training_td3_agent(episodes=500):
 
             state = next_state
             episode_reward += reward
-            episode_rewards.append(reward)
             agent.learn()
 
             if done:
@@ -46,7 +44,7 @@ action_dim = env.action_space.shape[0]
 action_bound = env.action_space.high[0]
 
 agent = TD3Agent(state_dim, action_dim, action_bound,
-                 gamma=0.9, tau=0.005, lr=3e-4,
+                 gamma=0.9, tau=0.005, lr=1e-2,
                  replay_buffer=2000, batch_size=64)
 
 rewards = training_td3_agent(episodes=500)

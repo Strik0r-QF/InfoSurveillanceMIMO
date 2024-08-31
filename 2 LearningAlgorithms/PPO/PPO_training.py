@@ -1,4 +1,9 @@
-from PPO import *
+from PPOAgent import *
+from Memory import *
+from WirelessSurveillanceEnv import *
+import random
+import pandas as pd
+from datetime import datetime
 
 
 def set_seed(seed):
@@ -29,7 +34,7 @@ set_seed(seed)
 env.seed(seed)
 
 learning_rates = [
-    0.01,
+    0.1,
 ]
 discounts = [
     # 0.9,
@@ -60,10 +65,10 @@ for lr in learning_rates:
 
                 timestep = 0
                 epi_rewards = []
-                for i_episode in range(1000):
+                for i_episode in range(2000):
                     state = env.reset()
                     epi_reward = 0
-                    for t in range(0, 500):
+                    while True:
                         timestep += 1
 
                         action, logprob = agent.select_action(state)
@@ -91,10 +96,16 @@ for lr in learning_rates:
 
                     # 保存模型
                     if i_episode % 100 == 0:  # 每 100 个 episode 保存一次
+                        # 获取当前时间
+                        now = datetime.now()
+
+                        # 格式化时间
+                        formatted_time = now.strftime('%Y%m%d-%H:%M')
+
                         torch.save(agent.policy_net.state_dict(),
-                                   f'policy_net{count}.pth')
+                                   f'policy_net-{formatted_time}.pth')
                         torch.save(agent.value_net.state_dict(),
-                                   f'value_net{count}.pth')
+                                   f'value_net-{formatted_time}.pth')
 
                 # 保存训练过程的奖励数据
                 epi_rewards = np.array(epi_rewards)
@@ -102,8 +113,15 @@ for lr in learning_rates:
                 df = pd.DataFrame({
                     'Episode': np.arange(1, len(epi_rewards) + 1),
                     'Reward': epi_rewards})
+
+                # 获取当前时间
+                now = datetime.now()
+
+                # 格式化时间
+                formatted_time = now.strftime('%Y%m%d-%H:%M')
+
                 # 将 DataFrame 保存为 CSV 文件
-                df.to_csv(f'epi_rewards-{count}.csv', index=False)
+                df.to_csv(f'epi_rewards-{formatted_time}.csv', index=False)
 
                 agent.policy_net.eval()
                 agent.value_net.eval()
